@@ -2,17 +2,18 @@ import React, { useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Text,
   FlatList,
+  StatusBar,
 } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { observer } from "mobx-react-lite";
 import { ArrowLeft } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tokens } from "../../theme/tokens";
 import {
   PostDetailContent,
@@ -37,6 +38,7 @@ const PostDetailScreen = observer(() => {
   const navigation = useNavigation();
   const queryClient = useQueryClient();
   const flatListRef = useRef<FlatList>(null);
+  const insets = useSafeAreaInsets();
 
   const {
     data: postData,
@@ -136,7 +138,11 @@ const PostDetailScreen = observer(() => {
 
   if (postLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={tokens.colors.background}
+        />
         <View style={styles.header}>
           <TouchableOpacity onPress={handleGoBack}>
             <ArrowLeft size={24} color={tokens.colors.textPrimary} />
@@ -145,13 +151,17 @@ const PostDetailScreen = observer(() => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={tokens.colors.primary} />
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (postError || !post) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={tokens.colors.background}
+        />
         <View style={styles.header}>
           <TouchableOpacity onPress={handleGoBack}>
             <ArrowLeft size={24} color={tokens.colors.textPrimary} />
@@ -161,16 +171,22 @@ const PostDetailScreen = observer(() => {
           message="Не удалось загрузить публикацию"
           onRetry={handleRetry}
         />
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={tokens.colors.background}
+      />
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        keyboardVerticalOffset={
+          Platform.OS === "ios" ? insets.top + 90 : insets.top
+        }
       >
         <FlatList
           ref={flatListRef}

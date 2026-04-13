@@ -5,12 +5,12 @@ import {
   RefreshControl,
   StyleSheet,
   StatusBar,
-  SafeAreaView,
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { observer } from "mobx-react-lite";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { feedStore, TabType } from "../stores/FeedStore";
 import { usePosts, useToggleLike } from "../services/hooks";
 import { PostCard } from "../components/post";
@@ -20,6 +20,7 @@ import { tokens } from "../theme/tokens";
 
 const FeedScreen = observer(() => {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const tier = feedStore.activeTab === "all" ? undefined : feedStore.activeTab;
 
   const {
@@ -78,11 +79,7 @@ const FeedScreen = observer(() => {
         onPress={() => handlePostPress(item)}
         activeOpacity={item.tier === "paid" ? 1 : 0.95}
       >
-        <PostCard
-          post={item}
-          onLike={() => handleLike(item.id)}
-          body={item.body}
-        />
+        <PostCard post={item} onLike={() => handleLike(item.id)} />
       </TouchableOpacity>
     ),
     [handlePostPress, handleLike],
@@ -100,8 +97,11 @@ const FeedScreen = observer(() => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" />
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={tokens.colors.background}
+        />
         <FeedTabs
           activeTab={feedStore.activeTab}
           onTabChange={handleTabChange}
@@ -109,14 +109,17 @@ const FeedScreen = observer(() => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={tokens.colors.primary} />
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" />
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={tokens.colors.background}
+        />
         <FeedTabs
           activeTab={feedStore.activeTab}
           onTabChange={handleTabChange}
@@ -125,13 +128,16 @@ const FeedScreen = observer(() => {
           message="Не удалось загрузить публикации"
           onRetry={handleRetry}
         />
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={tokens.colors.background}
+      />
       <FeedTabs activeTab={feedStore.activeTab} onTabChange={handleTabChange} />
       <FlatList
         data={posts}
@@ -151,7 +157,7 @@ const FeedScreen = observer(() => {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
-    </SafeAreaView>
+    </View>
   );
 });
 
