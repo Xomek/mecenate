@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Text,
+  FlatList,
 } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { observer } from "mobx-react-lite";
@@ -16,7 +17,7 @@ import { tokens } from "../../theme/tokens";
 import {
   PostDetailContent,
   PostDetailActions,
-  CommentList,
+  CommentItem,
   CommentInput,
 } from "../../components/post-detail";
 import { ErrorView } from "../../components/ErrorView";
@@ -34,8 +35,8 @@ const PostDetailScreen = observer(() => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const navigation = useNavigation();
-
   const queryClient = useQueryClient();
+  const flatListRef = useRef<FlatList>(null);
 
   const {
     data: postData,
@@ -109,7 +110,7 @@ const PostDetailScreen = observer(() => {
   const handleSendComment = (text: string) => {
     addComment(text, {
       onSuccess: () => {
-        console.log("Комментарий добавлен");
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
       },
     });
   };
@@ -124,6 +125,12 @@ const PostDetailScreen = observer(() => {
       router.back();
     } else {
       router.replace("/");
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
   };
 
@@ -159,55 +166,85 @@ const PostDetailScreen = observer(() => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.keyboardView}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleGoBack}>
-            <ArrowLeft size={24} color={tokens.colors.textPrimary} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.content}>
-          <PostDetailContent post={post} />
-
-          <PostDetailActions
-            likesCount={post.likesCount}
-            commentsCount={comments.length}
-            isLiked={post.isLiked}
-            onLike={handleLike}
-          />
-
-          <Text style={styles.commentsTitle}>
-            Комментарии ({comments.length})
-          </Text>
-
-          {commentsError ? (
-            <View style={styles.commentsError}>
-              <Text style={styles.commentsErrorText}>
-                Не удалось загрузить комментарии
-              </Text>
-              <TouchableOpacity onPress={() => refetchComments()}>
-                <Text style={styles.retryText}>Повторить</Text>
-              </TouchableOpacity>
+        <FlatList
+          ref={flatListRef}
+          data={comments}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.commentItemContainer}>
+              <CommentItem comment={item} />
             </View>
-          ) : (
-            <CommentList
-              comments={comments}
-              loading={commentsLoading}
-              loadingMore={isFetchingNextPage}
-              hasMore={hasNextPage}
-              onLoadMore={fetchNextPage}
-            />
           )}
-        </View>
+          ListHeaderComponent={
+            <>
+              <View style={styles.header}>
+                <TouchableOpacity onPress={handleGoBack}>
+                  <ArrowLeft size={24} color={tokens.colors.textPrimary} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.content}>
+                <PostDetailContent post={post} />
+
+                <PostDetailActions
+                  likesCount={post.likesCount}
+                  commentsCount={comments.length}
+                  isLiked={post.isLiked}
+                  onLike={handleLike}
+                />
+
+                <Text style={styles.commentsTitle}>
+                  Комментарии ({comments.length})
+                </Text>
+              </View>
+            </>
+          }
+          ListEmptyComponent={
+            !commentsLoading && !commentsError ? (
+              <Text style={styles.empty}>Нет комментариев</Text>
+            ) : null
+          }
+          ListFooterComponent={
+            <>
+              {commentsError && (
+                <View style={styles.commentsError}>
+                  <Text style={styles.commentsErrorText}>
+                    Не удалось загрузить комментарии
+                  </Text>
+                  <TouchableOpacity onPress={() => refetchComments()}>
+                    <Text style={styles.retryText}>Повторить</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              {isFetchingNextPage && (
+                <ActivityIndicator
+                  style={styles.loadingMore}
+                  color={tokens.colors.primary}
+                />
+              )}
+            </>
+          }
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.3}
+          contentContainerStyle={[
+            styles.listContent,
+            comments.length === 0 && { flex: 1 },
+          ]}
+          showsVerticalScrollIndicator={true}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          style={{ flex: 1 }}
+        />
 
         <CommentInput onSubmit={handleSendComment} />
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 });
 
@@ -215,6 +252,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: tokens.colors.background,
+  },
+  keyboardView: {
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -226,7 +266,13 @@ const styles = StyleSheet.create({
     paddingVertical: tokens.spacing.md,
   },
   content: {
-    flex: 1,
+    paddingHorizontal: tokens.spacing.lg,
+  },
+  listContent: {
+    flexGrow: 1,
+    paddingBottom: tokens.spacing.md,
+  },
+  commentItemContainer: {
     paddingHorizontal: tokens.spacing.lg,
   },
   commentsTitle: {
@@ -236,14 +282,26 @@ const styles = StyleSheet.create({
     marginTop: tokens.spacing.lg,
     marginBottom: tokens.spacing.md,
   },
+  empty: {
+    fontSize: tokens.typography.fontSize.md,
+    color: tokens.colors.textTertiary,
+    textAlign: "center",
+    paddingVertical: tokens.spacing.xl,
+    paddingHorizontal: tokens.spacing.lg,
+  },
+  loadingMore: {
+    paddingVertical: tokens.spacing.lg,
+  },
   commentsError: {
     alignItems: "center",
     paddingVertical: tokens.spacing.xl,
+    paddingHorizontal: tokens.spacing.lg,
   },
   commentsErrorText: {
     fontSize: tokens.typography.fontSize.md,
     color: tokens.colors.textSecondary,
     marginBottom: tokens.spacing.md,
+    textAlign: "center",
   },
   retryText: {
     fontSize: tokens.typography.fontSize.md,
