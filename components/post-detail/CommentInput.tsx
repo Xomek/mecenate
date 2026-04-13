@@ -3,10 +3,11 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  Text,
   StyleSheet,
+  Platform,
 } from "react-native";
 import * as Haptics from "expo-haptics";
+import { Send } from "lucide-react-native";
 import { tokens } from "../../theme/tokens";
 
 interface CommentInputProps {
@@ -38,6 +39,7 @@ export const CommentInput = ({ onSubmit }: CommentInputProps) => {
         onChangeText={setText}
         multiline
         maxLength={500}
+        blurOnSubmit={false}
       />
       <TouchableOpacity
         style={[
@@ -47,7 +49,7 @@ export const CommentInput = ({ onSubmit }: CommentInputProps) => {
         onPress={handleSubmit}
         disabled={!text.trim() || sending}
       >
-        <Text style={styles.buttonText}>{sending ? "..." : "Отправить"}</Text>
+        <Send size={20} color="#FFFFFF" />
       </TouchableOpacity>
     </View>
   );
@@ -62,6 +64,9 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: tokens.colors.separator,
     backgroundColor: tokens.colors.background,
+    ...(Platform.OS === "ios" && {
+      paddingBottom: Math.max(tokens.spacing.md, 34),
+    }),
   },
   input: {
     flex: 1,
@@ -76,19 +81,14 @@ const styles = StyleSheet.create({
     marginRight: tokens.spacing.md,
   },
   button: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: tokens.colors.primary,
-    paddingHorizontal: tokens.spacing.lg,
-    paddingVertical: tokens.spacing.sm,
-    borderRadius: tokens.borderRadius.full,
     justifyContent: "center",
     alignItems: "center",
   },
   buttonDisabled: {
     opacity: 0.5,
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: tokens.typography.fontSize.md,
-    fontWeight: "600",
   },
 });

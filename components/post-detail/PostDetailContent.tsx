@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { PostHeader } from "../post/PostHeader";
 import { PostCover } from "../post/PostCover";
 import { tokens } from "../../theme/tokens";
@@ -13,8 +13,8 @@ export const PostDetailContent = ({ post }: PostDetailContentProps) => {
   return (
     <>
       <PostHeader author={post.author} createdAt={post.createdAt} />
-      <Text style={styles.title}>{post.title}</Text>
       <PostCover coverUrl={post.coverUrl} />
+      <Text style={styles.title}>{post.title}</Text>
       <Text style={styles.body}>{post.body}</Text>
     </>
   );
@@ -22,8 +22,8 @@ export const PostDetailContent = ({ post }: PostDetailContentProps) => {
 
 const styles = StyleSheet.create({
   title: {
-    fontSize: tokens.typography.fontSize.xxl,
-    fontWeight: "bold",
+    fontSize: tokens.typography.fontSize.lg,
+    fontWeight: "600",
     color: tokens.colors.textPrimary,
     marginBottom: tokens.spacing.md,
   },
@@ -32,6 +32,6 @@ const styles = StyleSheet.create({
     lineHeight:
       tokens.typography.lineHeight.normal * tokens.typography.fontSize.md,
     color: tokens.colors.textPrimary,
-    marginVertical: tokens.spacing.lg,
+    marginBottom: tokens.spacing.lg,
   },
 });

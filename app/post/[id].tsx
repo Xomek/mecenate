@@ -2,17 +2,16 @@ import React, { useEffect, useRef } from "react";
 import {
   View,
   StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Text,
   FlatList,
   StatusBar,
+  TouchableOpacity,
 } from "react-native";
-import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { observer } from "mobx-react-lite";
-import { ArrowLeft } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tokens } from "../../theme/tokens";
 import {
@@ -35,7 +34,6 @@ import { useQueryClient } from "@tanstack/react-query";
 const PostDetailScreen = observer(() => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const navigation = useNavigation();
   const queryClient = useQueryClient();
   const flatListRef = useRef<FlatList>(null);
   const insets = useSafeAreaInsets();
@@ -122,14 +120,6 @@ const PostDetailScreen = observer(() => {
     refetchComments();
   };
 
-  const handleGoBack = () => {
-    if (navigation.canGoBack()) {
-      router.back();
-    } else {
-      router.replace("/");
-    }
-  };
-
   const handleLoadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -143,11 +133,6 @@ const PostDetailScreen = observer(() => {
           barStyle="dark-content"
           backgroundColor={tokens.colors.background}
         />
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleGoBack}>
-            <ArrowLeft size={24} color={tokens.colors.textPrimary} />
-          </TouchableOpacity>
-        </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={tokens.colors.primary} />
         </View>
@@ -162,11 +147,6 @@ const PostDetailScreen = observer(() => {
           barStyle="dark-content"
           backgroundColor={tokens.colors.background}
         />
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleGoBack}>
-            <ArrowLeft size={24} color={tokens.colors.textPrimary} />
-          </TouchableOpacity>
-        </View>
         <ErrorView
           message="Не удалось загрузить публикацию"
           onRetry={handleRetry}
@@ -198,28 +178,20 @@ const PostDetailScreen = observer(() => {
             </View>
           )}
           ListHeaderComponent={
-            <>
-              <View style={styles.header}>
-                <TouchableOpacity onPress={handleGoBack}>
-                  <ArrowLeft size={24} color={tokens.colors.textPrimary} />
-                </TouchableOpacity>
-              </View>
+            <View style={styles.content}>
+              <PostDetailContent post={post} />
 
-              <View style={styles.content}>
-                <PostDetailContent post={post} />
+              <PostDetailActions
+                likesCount={post.likesCount}
+                commentsCount={comments.length}
+                isLiked={post.isLiked}
+                onLike={handleLike}
+              />
 
-                <PostDetailActions
-                  likesCount={post.likesCount}
-                  commentsCount={comments.length}
-                  isLiked={post.isLiked}
-                  onLike={handleLike}
-                />
-
-                <Text style={styles.commentsTitle}>
-                  Комментарии ({comments.length})
-                </Text>
-              </View>
-            </>
+              <Text style={styles.commentsTitle}>
+                Комментарии ({comments.length})
+              </Text>
+            </View>
           }
           ListEmptyComponent={
             !commentsLoading && !commentsError ? (
@@ -277,12 +249,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  header: {
-    paddingHorizontal: tokens.spacing.lg,
-    paddingVertical: tokens.spacing.md,
-  },
   content: {
     paddingHorizontal: tokens.spacing.lg,
+    paddingTop: tokens.spacing.md,
   },
   listContent: {
     flexGrow: 1,

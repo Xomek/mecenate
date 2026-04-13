@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { observer } from "mobx-react-lite";
 import { tokens } from "../../theme/tokens";
 import { PostHeader } from "./PostHeader";
@@ -21,12 +21,12 @@ export const PostCard = observer(({ post, onLike }: PostCardProps) => {
     <View style={styles.card}>
       <PostHeader author={post.author} createdAt={post.createdAt} />
 
-      <Text style={styles.title}>{post.title}</Text>
-
       <View style={styles.coverContainer}>
         <PostCover coverUrl={post.coverUrl} title={post.title} />
         {isPaid && <PaidCoverOverlay />}
       </View>
+
+      {!isPaid && <Text style={styles.title}>{post.title}</Text>}
 
       <PostContent preview={post.preview} isPaid={isPaid} body={post.body} />
 
@@ -52,14 +52,14 @@ const styles = StyleSheet.create({
     boxShadow: tokens.shadows.sm.boxShadow,
     elevation: tokens.shadows.sm.elevation,
   },
+  coverContainer: {
+    position: "relative",
+    marginBottom: tokens.spacing.md,
+  },
   title: {
     fontSize: tokens.typography.fontSize.lg,
     fontWeight: "600",
     color: tokens.colors.textPrimary,
-    marginBottom: tokens.spacing.md,
-  },
-  coverContainer: {
-    position: "relative",
     marginBottom: tokens.spacing.md,
   },
 });
