@@ -85,7 +85,11 @@ const PostDetailScreen = observer(() => {
   };
 
   const handleSendComment = (text: string) => {
-    addComment(text);
+    addComment(text, {
+      onSuccess: () => {
+        console.log("Комментарий добавлен");
+      },
+    });
   };
 
   const handleGoBack = () => {
