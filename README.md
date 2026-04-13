@@ -1,4 +1,4 @@
-# Mecenate Feed — Тестовое задание
+# Mecenate - Тестовое задание
 
 Приложение ленты публикаций для платформы Mecenate (React Native + Expo).
 

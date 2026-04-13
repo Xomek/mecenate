@@ -163,10 +163,8 @@ const PostDetailScreen = observer(() => {
       />
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={
-          Platform.OS === "ios" ? insets.top + 90 : insets.top
-        }
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? insets.top + 90 : 0}
       >
         <FlatList
           ref={flatListRef}
