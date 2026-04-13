@@ -6,19 +6,23 @@ import {
   StyleSheet,
   StatusBar,
   SafeAreaView,
-  Text,
+  TouchableOpacity,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { observer } from "mobx-react-lite";
-import { feedStore } from "../stores/FeedStore";
+import { feedStore, TabType } from "../stores/FeedStore";
+import { PostCard } from "../components/post";
+import { FeedTabs } from "../components/FeedTabs";
 import { ErrorView } from "../components/ErrorView";
 import {
   LoadingIndicator,
   LoadingMoreIndicator,
 } from "../components/LoadingIndicator";
 import { tokens } from "../theme/tokens";
-import { PostCard } from "../components/post";
 
 const FeedScreen = observer(() => {
+  const router = useRouter();
+
   useEffect(() => {
     feedStore.fetchFeed();
   }, []);
@@ -40,15 +44,27 @@ const FeedScreen = observer(() => {
     feedStore.toggleLike(postId);
   }, []);
 
+  const handlePostPress = useCallback(
+    (postId: string) => {
+      router.push(`/post/${postId}`);
+    },
+    [router],
+  );
+
+  const handleTabChange = useCallback((tab: TabType) => {
+    feedStore.setActiveTab(tab);
+  }, []);
+
   const renderItem = useCallback(
     ({ item }: { item: any }) => (
-      <PostCard
-        post={item}
-        onLike={() => handleLike(item.id)}
-        body={item.body}
-      />
+      <TouchableOpacity
+        onPress={() => handlePostPress(item.id)}
+        activeOpacity={0.95}
+      >
+        <PostCard post={item} onLike={() => handleLike(item.id)} />
+      </TouchableOpacity>
     ),
-    [handleLike],
+    [handlePostPress, handleLike],
   );
 
   const keyExtractor = useCallback((item: any) => item.id, []);
@@ -62,6 +78,10 @@ const FeedScreen = observer(() => {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" />
+        <FeedTabs
+          activeTab={feedStore.activeTab}
+          onTabChange={handleTabChange}
+        />
         <LoadingIndicator />
       </SafeAreaView>
     );
@@ -71,6 +91,10 @@ const FeedScreen = observer(() => {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" />
+        <FeedTabs
+          activeTab={feedStore.activeTab}
+          onTabChange={handleTabChange}
+        />
         <ErrorView message={feedStore.error} onRetry={handleRetry} />
       </SafeAreaView>
     );
@@ -79,6 +103,8 @@ const FeedScreen = observer(() => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
+
+      <FeedTabs activeTab={feedStore.activeTab} onTabChange={handleTabChange} />
 
       <FlatList
         data={feedStore.posts}

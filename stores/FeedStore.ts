@@ -2,6 +2,8 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { api } from "../services/api";
 import type { Post } from "../types";
 
+export type TabType = "all" | "free" | "paid";
+
 export class FeedStore {
   posts: Post[] = [];
   nextCursor: string | null = null;
@@ -10,9 +12,15 @@ export class FeedStore {
   isRefreshing: boolean = false;
   isLoadingMore: boolean = false;
   error: string | null = null;
+  activeTab: TabType = "all";
 
   constructor() {
     makeAutoObservable(this);
+  }
+
+  setActiveTab(tab: TabType) {
+    this.activeTab = tab;
+    this.fetchFeed(true);
   }
 
   async fetchFeed(refresh = false) {
@@ -28,7 +36,8 @@ export class FeedStore {
     });
 
     try {
-      const response = await api.getPosts({ limit: 10 });
+      const tier = this.activeTab === "all" ? undefined : this.activeTab;
+      const response = await api.getPosts({ limit: 10, tier });
 
       runInAction(() => {
         if (response.ok) {
@@ -63,9 +72,11 @@ export class FeedStore {
     });
 
     try {
+      const tier = this.activeTab === "all" ? undefined : this.activeTab;
       const response = await api.getPosts({
         limit: 10,
         cursor: this.nextCursor,
+        tier,
       });
 
       runInAction(() => {
