@@ -75,7 +75,11 @@ const FeedScreen = observer(() => {
         onPress={() => handlePostPress(item.id)}
         activeOpacity={0.95}
       >
-        <PostCard post={item} onLike={() => handleLike(item.id)} />
+        <PostCard
+          post={item}
+          onLike={() => handleLike(item.id)}
+          body={item.body}
+        />
       </TouchableOpacity>
     ),
     [handlePostPress, handleLike],

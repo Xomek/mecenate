@@ -24,6 +24,7 @@ export const PostContent = ({ preview, isPaid, body }: PostContentProps) => {
         {displayText}
         {hasMore && !expanded && (
           <Text>
+            {" "}
             <Text style={styles.showMore} onPress={() => setExpanded(true)}>
               Показать ещё
             </Text>
