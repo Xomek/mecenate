@@ -43,22 +43,26 @@ export const PostDetailActions = ({
   return (
     <View style={styles.actions}>
       <Animated.View style={animatedLikeStyle}>
-        <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
+        <TouchableOpacity
+          style={[styles.actionButton, isLiked && styles.actionButtonLiked]}
+          onPress={handleLike}
+          activeOpacity={0.7}
+        >
           <Heart
-            size={24}
-            color={isLiked ? tokens.colors.like : tokens.colors.icon}
-            fill={isLiked ? tokens.colors.like : "none"}
+            size={20}
+            color={isLiked ? "#FFFFFF" : tokens.colors.icon}
+            fill={isLiked ? "#FFFFFF" : "none"}
           />
-          <Text style={[styles.actionText, isLiked && styles.likedText]}>
+          <Text style={[styles.actionText, isLiked && styles.actionTextLiked]}>
             {likesCount}
           </Text>
         </TouchableOpacity>
       </Animated.View>
 
-      <View style={styles.actionButton}>
-        <MessageCircle size={24} color={tokens.colors.icon} />
+      <TouchableOpacity style={styles.actionButton} activeOpacity={0.7}>
+        <MessageCircle size={20} color={tokens.colors.icon} />
         <Text style={styles.actionText}>{commentsCount}</Text>
-      </View>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -75,11 +79,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: tokens.spacing.xl,
+    marginRight: tokens.spacing.xs,
     paddingVertical: tokens.spacing.sm,
     paddingHorizontal: tokens.spacing.md,
     borderRadius: tokens.borderRadius.full,
     backgroundColor: tokens.colors.buttonBackground,
+  },
+  actionButtonLiked: {
+    backgroundColor: "#FF2B75",
   },
   actionText: {
     fontSize: tokens.typography.fontSize.md,
@@ -87,7 +94,7 @@ const styles = StyleSheet.create({
     color: tokens.colors.textSecondary,
     marginLeft: tokens.spacing.sm,
   },
-  likedText: {
-    color: tokens.colors.like,
+  actionTextLiked: {
+    color: "#FFFFFF",
   },
 });

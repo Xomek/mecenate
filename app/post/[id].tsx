@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -9,7 +9,7 @@ import {
   Platform,
   Text,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { observer } from "mobx-react-lite";
 import { ArrowLeft } from "lucide-react-native";
 import { tokens } from "../../theme/tokens";
@@ -19,21 +19,38 @@ import {
   CommentList,
   CommentInput,
 } from "../../components/post-detail";
-import { api } from "../../services/api";
+import {
+  usePost,
+  useComments,
+  useToggleLike,
+  useAddComment,
+} from "../../services/hooks";
 import { wsService } from "../../services/websocket";
 import { getAuthToken } from "../../services/auth";
-import type { Post, Comment } from "../../types";
 
 const PostDetailScreen = observer(() => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const [post, setPost] = useState<Post | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingComments, setLoadingComments] = useState(false);
-  const [loadingMoreComments, setLoadingMoreComments] = useState(false);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [hasMoreComments, setHasMoreComments] = useState(true);
+  const navigation = useNavigation();
+
+  const {
+    data: postData,
+    isLoading: postLoading,
+    refetch: refetchPost,
+  } = usePost(id);
+  const {
+    data: commentsData,
+    isLoading: commentsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useComments(id);
+  const { mutate: toggleLike } = useToggleLike();
+  const { mutate: addComment } = useAddComment(id);
+
+  const post = postData?.data.post;
+  const comments =
+    commentsData?.pages.flatMap((page) => page.data.comments) ?? [];
 
   useEffect(() => {
     const initWebSocket = async () => {
@@ -51,127 +68,35 @@ const PostDetailScreen = observer(() => {
     if (!id) return;
 
     const unsubscribe = wsService.subscribe((event) => {
-      if (event.type === "like_updated" && event.data.postId === id) {
-        setPost((prev) =>
-          prev
-            ? {
-                ...prev,
-                likesCount: event.data.likesCount,
-                isLiked: event.data.isLiked,
-              }
-            : prev,
-        );
+      if (event.type === "like_updated" && event.postId === id) {
+        refetchPost();
       }
-      if (event.type === "comment_added" && event.data.postId === id) {
-        setComments((prev) => [event.data.comment, ...prev]);
+      if (event.type === "comment_added" && event.comment?.postId === id) {
+        refetchPost();
       }
     });
 
     return unsubscribe;
-  }, [id]);
+  }, [id, refetchPost]);
 
-  useEffect(() => {
-    fetchPost();
-    fetchComments();
-  }, [id]);
-
-  const fetchPost = async () => {
-    try {
-      const token = await getAuthToken();
-      const response = await fetch(
-        `https://k8s.mectest.ru/test-app/posts/${id}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      const data = await response.json();
-      if (data.ok) setPost(data.data.post);
-    } catch (error) {
-      console.error("Failed to fetch post:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchComments = async (cursor?: string) => {
-    if (!id) return;
-
-    if (!cursor) {
-      setLoadingComments(true);
-    } else {
-      setLoadingMoreComments(true);
-    }
-
-    try {
-      const token = await getAuthToken();
-      const url = new URL(
-        `https://k8s.mectest.ru/test-app/posts/${id}/comments`,
-      );
-      url.searchParams.append("limit", "20");
-      if (cursor) url.searchParams.append("cursor", cursor);
-
-      const response = await fetch(url.toString(), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
-
-      if (data.ok) {
-        if (cursor) {
-          setComments((prev) => [...prev, ...data.data.comments]);
-        } else {
-          setComments(data.data.comments);
-        }
-        setNextCursor(data.data.nextCursor);
-        setHasMoreComments(data.data.hasMore);
-      }
-    } catch (error) {
-      console.error("Failed to fetch comments:", error);
-    } finally {
-      setLoadingComments(false);
-      setLoadingMoreComments(false);
-    }
-  };
-
-  const handleLike = async () => {
+  const handleLike = () => {
     if (!post) return;
+    toggleLike(post.id);
+  };
 
-    const previousState = {
-      isLiked: post.isLiked,
-      likesCount: post.likesCount,
-    };
+  const handleSendComment = (text: string) => {
+    addComment(text);
+  };
 
-    setPost({
-      ...post,
-      isLiked: !post.isLiked,
-      likesCount: post.likesCount + (post.isLiked ? -1 : 1),
-    });
-
-    try {
-      await api.toggleLike(post.id);
-    } catch {
-      setPost({ ...post, ...previousState });
+  const handleGoBack = () => {
+    if (navigation.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/");
     }
   };
 
-  const handleSendComment = async (text: string) => {
-    if (!id) return;
-
-    const token = await getAuthToken();
-    await fetch(`https://k8s.mectest.ru/test-app/posts/${id}/comments`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ text }),
-    });
-  };
-
-  const loadMoreComments = () => {
-    if (hasMoreComments && !loadingMoreComments && nextCursor) {
-      fetchComments(nextCursor);
-    }
-  };
-
-  if (loading || !post) {
+  if (postLoading || !post) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -189,7 +114,7 @@ const PostDetailScreen = observer(() => {
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity onPress={handleGoBack}>
             <ArrowLeft size={24} color={tokens.colors.textPrimary} />
           </TouchableOpacity>
         </View>
@@ -210,10 +135,10 @@ const PostDetailScreen = observer(() => {
 
           <CommentList
             comments={comments}
-            loading={loadingComments}
-            loadingMore={loadingMoreComments}
-            hasMore={hasMoreComments}
-            onLoadMore={loadMoreComments}
+            loading={commentsLoading}
+            loadingMore={isFetchingNextPage}
+            hasMore={hasNextPage}
+            onLoadMore={fetchNextPage}
           />
         </View>
 

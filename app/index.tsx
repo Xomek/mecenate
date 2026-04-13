@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useCallback } from "react";
 import {
   View,
   FlatList,
@@ -7,6 +7,7 @@ import {
   StatusBar,
   SafeAreaView,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { observer } from "mobx-react-lite";
@@ -14,35 +15,48 @@ import { feedStore, TabType } from "../stores/FeedStore";
 import { PostCard } from "../components/post";
 import { FeedTabs } from "../components/FeedTabs";
 import { ErrorView } from "../components/ErrorView";
-import {
-  LoadingIndicator,
-  LoadingMoreIndicator,
-} from "../components/LoadingIndicator";
 import { tokens } from "../theme/tokens";
+import { usePosts, useToggleLike } from "../services/hooks";
 
 const FeedScreen = observer(() => {
   const router = useRouter();
+  const tier = feedStore.activeTab === "all" ? undefined : feedStore.activeTab;
 
-  useEffect(() => {
-    feedStore.fetchFeed();
-  }, []);
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+    isRefetching,
+    error,
+  } = usePosts(tier);
+
+  const { mutate: toggleLike } = useToggleLike();
+
+  const posts = data?.pages.flatMap((page) => page.data.posts) ?? [];
 
   const handleRefresh = useCallback(() => {
-    feedStore.fetchFeed(true);
-  }, []);
+    refetch();
+  }, [refetch]);
 
   const handleLoadMore = useCallback(() => {
-    feedStore.fetchMore();
-  }, []);
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleRetry = useCallback(() => {
-    feedStore.clearError();
-    feedStore.fetchFeed();
-  }, []);
+    refetch();
+  }, [refetch]);
 
-  const handleLike = useCallback((postId: string) => {
-    feedStore.toggleLike(postId);
-  }, []);
+  const handleLike = useCallback(
+    (postId: string) => {
+      toggleLike(postId);
+    },
+    [toggleLike],
+  );
 
   const handlePostPress = useCallback(
     (postId: string) => {
@@ -67,14 +81,17 @@ const FeedScreen = observer(() => {
     [handlePostPress, handleLike],
   );
 
-  const keyExtractor = useCallback((item: any) => item.id, []);
-
   const renderFooter = useCallback(() => {
-    if (!feedStore.isLoadingMore) return null;
-    return <LoadingMoreIndicator />;
-  }, [feedStore.isLoadingMore]);
+    if (!isFetchingNextPage) return null;
+    return (
+      <ActivityIndicator
+        style={styles.loadingMore}
+        color={tokens.colors.primary}
+      />
+    );
+  }, [isFetchingNextPage]);
 
-  if (feedStore.isLoading && feedStore.posts.length === 0) {
+  if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" />
@@ -82,12 +99,14 @@ const FeedScreen = observer(() => {
           activeTab={feedStore.activeTab}
           onTabChange={handleTabChange}
         />
-        <LoadingIndicator />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={tokens.colors.primary} />
+        </View>
       </SafeAreaView>
     );
   }
 
-  if (feedStore.error && feedStore.posts.length === 0) {
+  if (error) {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" />
@@ -95,7 +114,10 @@ const FeedScreen = observer(() => {
           activeTab={feedStore.activeTab}
           onTabChange={handleTabChange}
         />
-        <ErrorView message={feedStore.error} onRetry={handleRetry} />
+        <ErrorView
+          message="Не удалось загрузить публикации"
+          onRetry={handleRetry}
+        />
       </SafeAreaView>
     );
   }
@@ -103,19 +125,17 @@ const FeedScreen = observer(() => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
-
       <FeedTabs activeTab={feedStore.activeTab} onTabChange={handleTabChange} />
-
       <FlatList
-        data={feedStore.posts}
+        data={posts}
         renderItem={renderItem}
-        keyExtractor={keyExtractor}
+        keyExtractor={(item) => item.id}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
         refreshControl={
           <RefreshControl
-            refreshing={feedStore.isRefreshing}
+            refreshing={isRefetching}
             onRefresh={handleRefresh}
             tintColor={tokens.colors.primary}
             colors={[tokens.colors.primary]}
@@ -133,9 +153,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: tokens.colors.background,
   },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   listContent: {
     paddingTop: tokens.spacing.md,
     paddingBottom: tokens.spacing.xl,
+  },
+  loadingMore: {
+    paddingVertical: tokens.spacing.lg,
   },
 });
 

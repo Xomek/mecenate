@@ -10,25 +10,22 @@ import * as Haptics from "expo-haptics";
 import { tokens } from "../../theme/tokens";
 
 interface CommentInputProps {
-  onSubmit: (text: string) => Promise<void>;
+  onSubmit: (text: string) => void;
 }
 
 export const CommentInput = ({ onSubmit }: CommentInputProps) => {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!text.trim() || sending) return;
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSending(true);
 
-    try {
-      await onSubmit(text.trim());
-      setText("");
-    } finally {
-      setSending(false);
-    }
+    onSubmit(text.trim());
+    setText("");
+    setSending(false);
   };
 
   return (
