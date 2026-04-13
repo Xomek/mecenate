@@ -48,10 +48,29 @@ export const useToggleLike = () => {
 
   return useMutation({
     mutationFn: api.toggleLike,
+
     onMutate: async (postId) => {
       await queryClient.cancelQueries({ queryKey: ["posts"] });
+      await queryClient.cancelQueries({ queryKey: ["post", postId] });
 
+      const previousPost = queryClient.getQueryData(["post", postId]);
       const previousPosts = queryClient.getQueriesData({ queryKey: ["posts"] });
+
+      queryClient.setQueryData(["post", postId], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            post: {
+              ...old.data.post,
+              isLiked: !old.data.post.isLiked,
+              likesCount:
+                old.data.post.likesCount + (old.data.post.isLiked ? -1 : 1),
+            },
+          },
+        };
+      });
 
       queryClient.setQueriesData({ queryKey: ["posts"] }, (old: any) => {
         if (!old) return old;
@@ -75,15 +94,24 @@ export const useToggleLike = () => {
         };
       });
 
-      return { previousPosts };
+      return { previousPost, previousPosts };
     },
-    onError: (_err, _postId, context) => {
+
+    onError: (_err, postId, context) => {
+      if (context?.previousPost) {
+        queryClient.setQueryData(["post", postId], context.previousPost);
+      }
       if (context?.previousPosts) {
         queryClient.setQueriesData(
           { queryKey: ["posts"] },
           context.previousPosts,
         );
       }
+    },
+
+    onSettled: (_data, _error, postId) => {
+      queryClient.invalidateQueries({ queryKey: ["post", postId] });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
 };

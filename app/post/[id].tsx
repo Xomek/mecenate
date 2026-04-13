@@ -28,11 +28,14 @@ import {
 } from "../../services/hooks";
 import { wsService } from "../../services/websocket";
 import { getAuthToken } from "../../services/auth";
+import { useQueryClient } from "@tanstack/react-query";
 
 const PostDetailScreen = observer(() => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const navigation = useNavigation();
+
+  const queryClient = useQueryClient();
 
   const {
     data: postData,
@@ -88,6 +91,18 @@ const PostDetailScreen = observer(() => {
 
   const handleLike = () => {
     if (!post) return;
+
+    const updatedPost = {
+      ...post,
+      isLiked: !post.isLiked,
+      likesCount: post.likesCount + (post.isLiked ? -1 : 1),
+    };
+
+    queryClient.setQueryData(["post", id], {
+      ...postData,
+      data: { post: updatedPost },
+    });
+
     toggleLike(post.id);
   };
 
