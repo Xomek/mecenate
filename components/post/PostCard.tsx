@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     marginHorizontal: tokens.spacing.lg,
     marginBottom: tokens.spacing.lg,
     padding: tokens.spacing.lg,
-    ...tokens.shadows.sm,
+    boxShadow: tokens.shadows.sm.boxShadow,
     position: "relative",
     overflow: "hidden",
   },

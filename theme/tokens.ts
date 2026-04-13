@@ -75,6 +75,7 @@ export const tokens = {
       shadowOpacity: 0.05,
       shadowRadius: 2,
       elevation: 1,
+      boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.05",
     },
     md: {
       shadowColor: "#000000",
@@ -82,6 +83,7 @@ export const tokens = {
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 2,
+      boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
     },
     lg: {
       shadowColor: "#000000",
@@ -89,6 +91,7 @@ export const tokens = {
       shadowOpacity: 0.15,
       shadowRadius: 8,
       elevation: 4,
+      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.15)",
     },
   },
 

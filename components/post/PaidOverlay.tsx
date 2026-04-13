@@ -16,7 +16,7 @@ export const PaidOverlay = ({ onDonate }: PaidOverlayProps) => {
 
   return (
     <View style={styles.paidOverlay}>
-      <BlurView intensity={20} tint="dark" style={styles.blur} />
+      <BlurView intensity={70} tint="dark" style={styles.blur} />
       <View style={styles.paidContent}>
         <View style={styles.iconContainer}>
           <DollarSign style={styles.dollarIcon} size={20} />
