@@ -1,12 +1,5 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSequence,
-  withSpring,
-} from "react-native-reanimated";
-import * as Haptics from "expo-haptics";
 import { Heart, MessageCircle } from "lucide-react-native";
 import { tokens } from "../../theme/tokens";
 
@@ -23,41 +16,26 @@ export const PostDetailActions = ({
   isLiked,
   onLike,
 }: PostDetailActionsProps) => {
-  const likeScale = useSharedValue(1);
-
-  const animatedLikeStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: likeScale.value }],
-  }));
-
   const handleLike = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    likeScale.value = withSequence(
-      withSpring(1.3, { duration: 100 }),
-      withSpring(1, { duration: 100 }),
-    );
-
     onLike();
   };
 
   return (
     <View style={styles.actions}>
-      <Animated.View style={animatedLikeStyle}>
-        <TouchableOpacity
-          style={[styles.actionButton, isLiked && styles.actionButtonLiked]}
-          onPress={handleLike}
-          activeOpacity={0.7}
-        >
-          <Heart
-            size={20}
-            color={isLiked ? "#FFFFFF" : tokens.colors.icon}
-            fill={isLiked ? "#FFFFFF" : "none"}
-          />
-          <Text style={[styles.actionText, isLiked && styles.actionTextLiked]}>
-            {likesCount}
-          </Text>
-        </TouchableOpacity>
-      </Animated.View>
+      <TouchableOpacity
+        style={[styles.actionButton, isLiked && styles.actionButtonLiked]}
+        onPress={handleLike}
+        activeOpacity={0.7}
+      >
+        <Heart
+          size={20}
+          color={isLiked ? "#FFFFFF" : tokens.colors.icon}
+          fill={isLiked ? "#FFFFFF" : "none"}
+        />
+        <Text style={[styles.actionText, isLiked && styles.actionTextLiked]}>
+          {likesCount}
+        </Text>
+      </TouchableOpacity>
 
       <TouchableOpacity style={styles.actionButton} activeOpacity={0.7}>
         <MessageCircle size={20} color={tokens.colors.icon} />
