@@ -1,6 +1,6 @@
 export const tokens = {
   colors: {
-    primary: "#6B4EFF",
+    primary: "#6115CD",
     secondary: "#FF6B6B",
 
     background: "#FFFFFF",

@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
 const TOKEN_KEY = "mecenate_user_uuid";
@@ -11,14 +12,41 @@ function generateUUID(): string {
   });
 }
 
+const storage = {
+  async getItem(key: string): Promise<string | null> {
+    try {
+      if (Platform.OS === "web") {
+        return localStorage.getItem(key);
+      } else {
+        return await SecureStore.getItemAsync(key);
+      }
+    } catch (error) {
+      console.warn(`Failed to get item ${key}:`, error);
+      return null;
+    }
+  },
+
+  async setItem(key: string, value: string): Promise<void> {
+    try {
+      if (Platform.OS === "web") {
+        localStorage.setItem(key, value);
+      } else {
+        await SecureStore.setItemAsync(key, value);
+      }
+    } catch (error) {
+      console.warn(`Failed to set item ${key}:`, error);
+    }
+  },
+};
+
 export async function getAuthToken(): Promise<string> {
   try {
-    let token = await SecureStore.getItemAsync(TOKEN_KEY);
+    let token = await storage.getItem(TOKEN_KEY);
 
     if (!token) {
       token = generateUUID();
-      await SecureStore.setItemAsync(TOKEN_KEY, token);
-      await SecureStore.setItemAsync(USER_ID_KEY, `user_${token.slice(0, 8)}`);
+      await storage.setItem(TOKEN_KEY, token);
+      await storage.setItem(USER_ID_KEY, `user_${token.slice(0, 8)}`);
     }
 
     return token;
@@ -30,8 +58,12 @@ export async function getAuthToken(): Promise<string> {
 
 export async function getUserId(): Promise<string> {
   try {
-    const userId = await SecureStore.getItemAsync(USER_ID_KEY);
-    return userId || `user_${(await getAuthToken()).slice(0, 8)}`;
+    const userId = await storage.getItem(USER_ID_KEY);
+    if (userId) return userId;
+
+    const newUserId = `user_${(await getAuthToken()).slice(0, 8)}`;
+    await storage.setItem(USER_ID_KEY, newUserId);
+    return newUserId;
   } catch {
     return "user_unknown";
   }
