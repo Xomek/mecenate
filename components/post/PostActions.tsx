@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Heart, MessageCircle } from "lucide-react-native";
 import { tokens } from "../../theme/tokens";
 
 interface PostActionsProps {
@@ -18,22 +19,28 @@ export const PostActions = ({
   return (
     <View style={styles.actions}>
       <TouchableOpacity
-        style={styles.actionButton}
+        style={[styles.actionButton, isLiked && styles.actionButtonLiked]}
         onPress={onLike}
         activeOpacity={0.7}
       >
-        <Text style={[styles.actionIcon, isLiked && styles.likedIcon]}>
-          {isLiked ? "❤️" : "🤍"}
-        </Text>
-        <Text style={[styles.actionText, isLiked && styles.likedText]}>
+        <Heart
+          size={20}
+          color={isLiked ? "#FFFFFF" : tokens.colors.icon}
+          fill={isLiked ? "#FFFFFF" : "none"}
+        />
+        <Text style={[styles.actionText, isLiked && styles.actionTextLiked]}>
           {likesCount}
         </Text>
       </TouchableOpacity>
 
-      <View style={styles.actionButton}>
-        <Text style={styles.actionIcon}>💬</Text>
+      <TouchableOpacity
+        style={styles.actionButton}
+        activeOpacity={0.7}
+        onPress={() => console.log("Comments pressed")}
+      >
+        <MessageCircle size={20} color={tokens.colors.icon} />
         <Text style={styles.actionText}>{commentsCount}</Text>
-      </View>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -41,6 +48,7 @@ export const PostActions = ({
 const styles = StyleSheet.create({
   actions: {
     flexDirection: "row",
+    alignItems: "center",
     borderTopWidth: 1,
     borderTopColor: tokens.colors.separator,
     paddingTop: tokens.spacing.md,
@@ -48,20 +56,23 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: tokens.spacing.xxl,
-    paddingVertical: tokens.spacing.xs,
-    paddingHorizontal: tokens.spacing.xs,
-  },
-  actionIcon: {
-    fontSize: 20,
+    justifyContent: "center",
     marginRight: tokens.spacing.xs,
+    paddingVertical: tokens.spacing.sm,
+    paddingHorizontal: tokens.spacing.md,
+    borderRadius: tokens.borderRadius.full,
+    backgroundColor: tokens.colors.buttonBackground,
   },
-  likedIcon: {},
+  actionButtonLiked: {
+    backgroundColor: "#FF2B75",
+  },
   actionText: {
     fontSize: tokens.typography.fontSize.md,
+    fontWeight: "500",
     color: tokens.colors.textSecondary,
+    marginLeft: tokens.spacing.sm,
   },
-  likedText: {
-    color: tokens.colors.secondary,
+  actionTextLiked: {
+    color: "#FFFFFF",
   },
 });

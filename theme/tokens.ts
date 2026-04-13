@@ -20,6 +20,10 @@ export const tokens = {
 
     paidOverlay: "rgba(0, 0, 0, 0.5)",
     shadow: "rgba(0, 0, 0, 0.1)",
+
+    icon: "#8E8E93",
+    like: "#FF3B30",
+    buttonBackground: "#F2F2F7",
   },
 
   spacing: {
