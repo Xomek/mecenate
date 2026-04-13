@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { BlurView } from "expo-blur";
 import { observer } from "mobx-react-lite";
 import { tokens } from "../theme/tokens";
 import type { Post } from "../types";
@@ -37,28 +38,16 @@ export const PostCard = observer(({ post, onLike }: PostCardProps) => {
       <Text style={styles.title}>{post.title}</Text>
 
       <View style={styles.coverContainer}>
-        <Image
-          source={{ uri: post.coverUrl }}
-          style={styles.cover}
-          resizeMode="cover"
-        />
+        <Image source={{ uri: post.coverUrl }} style={styles.cover} />
       </View>
 
-      <View style={styles.content}>
-        {isPaid ? (
-          <View style={styles.paidPlaceholder}>
-            <Text style={styles.paidIcon}>🔒</Text>
-            <Text style={styles.paidText}>Платный контент</Text>
-            <Text style={styles.paidSubtext}>
-              Подпишитесь, чтобы увидеть публикацию
-            </Text>
-          </View>
-        ) : (
+      {!isPaid && (
+        <View style={styles.content}>
           <Text style={styles.preview} numberOfLines={3}>
             {post.preview}
           </Text>
-        )}
-      </View>
+        </View>
+      )}
 
       <View style={styles.actions}>
         <TouchableOpacity
@@ -79,6 +68,21 @@ export const PostCard = observer(({ post, onLike }: PostCardProps) => {
           <Text style={styles.actionText}>{post.commentsCount}</Text>
         </View>
       </View>
+
+      {isPaid && (
+        <View style={styles.paidOverlay}>
+          <BlurView intensity={20} tint="dark" style={styles.blur} />
+          <View style={styles.paidContent}>
+            <Text style={styles.paidTitle}>Контент скрыт пользователем.</Text>
+            <Text style={styles.paidSubtitle}>
+              Доступ откроется после доната
+            </Text>
+            <TouchableOpacity style={styles.donateButton} activeOpacity={0.8}>
+              <Text style={styles.donateButtonText}>Отправить донат</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </View>
   );
 });
@@ -91,6 +95,8 @@ const styles = StyleSheet.create({
     marginBottom: tokens.spacing.lg,
     padding: tokens.spacing.lg,
     ...tokens.shadows.sm,
+    position: "relative",
+    overflow: "hidden",
   },
   header: {
     flexDirection: "row",
@@ -163,27 +169,6 @@ const styles = StyleSheet.create({
       tokens.typography.lineHeight.normal * tokens.typography.fontSize.md,
     color: tokens.colors.textPrimary,
   },
-  paidPlaceholder: {
-    backgroundColor: tokens.colors.surface,
-    borderRadius: tokens.borderRadius.md,
-    padding: tokens.spacing.xl,
-    alignItems: "center",
-  },
-  paidIcon: {
-    fontSize: 32,
-    marginBottom: tokens.spacing.sm,
-  },
-  paidText: {
-    fontSize: tokens.typography.fontSize.md,
-    fontWeight: "600",
-    color: tokens.colors.textPrimary,
-    marginBottom: tokens.spacing.xs,
-  },
-  paidSubtext: {
-    fontSize: tokens.typography.fontSize.sm,
-    color: tokens.colors.textSecondary,
-    textAlign: "center",
-  },
   actions: {
     flexDirection: "row",
     borderTopWidth: 1,
@@ -208,5 +193,59 @@ const styles = StyleSheet.create({
   },
   likedText: {
     color: tokens.colors.secondary,
+  },
+  // Стили для оверлея платного контента
+  paidOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: tokens.borderRadius.lg,
+    overflow: "hidden",
+  },
+  blur: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  paidContent: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: tokens.spacing.xl,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+  },
+  paidTitle: {
+    fontSize: tokens.typography.fontSize.lg,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    marginBottom: tokens.spacing.xs,
+    textAlign: "center",
+  },
+  paidSubtitle: {
+    fontSize: tokens.typography.fontSize.md,
+    color: "rgba(255, 255, 255, 0.8)",
+    marginBottom: tokens.spacing.xl,
+    textAlign: "center",
+  },
+  donateButton: {
+    backgroundColor: tokens.colors.primary,
+    paddingHorizontal: tokens.spacing.xxxl,
+    paddingVertical: tokens.spacing.md,
+    borderRadius: tokens.borderRadius.full,
+    minWidth: 200,
+    alignItems: "center",
+  },
+  donateButtonText: {
+    color: "#FFFFFF",
+    fontSize: tokens.typography.fontSize.md,
+    fontWeight: "600",
   },
 });
