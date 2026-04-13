@@ -12,11 +12,11 @@ import {
 import { useRouter } from "expo-router";
 import { observer } from "mobx-react-lite";
 import { feedStore, TabType } from "../stores/FeedStore";
+import { usePosts, useToggleLike } from "../services/hooks";
 import { PostCard } from "../components/post";
 import { FeedTabs } from "../components/FeedTabs";
 import { ErrorView } from "../components/ErrorView";
 import { tokens } from "../theme/tokens";
-import { usePosts, useToggleLike } from "../services/hooks";
 
 const FeedScreen = observer(() => {
   const router = useRouter();
@@ -59,8 +59,11 @@ const FeedScreen = observer(() => {
   );
 
   const handlePostPress = useCallback(
-    (postId: string) => {
-      router.push(`/post/${postId}`);
+    (post: any) => {
+      if (post.tier === "paid") {
+        return;
+      }
+      router.push(`/post/${post.id}`);
     },
     [router],
   );
@@ -72,8 +75,8 @@ const FeedScreen = observer(() => {
   const renderItem = useCallback(
     ({ item }: { item: any }) => (
       <TouchableOpacity
-        onPress={() => handlePostPress(item.id)}
-        activeOpacity={0.95}
+        onPress={() => handlePostPress(item)}
+        activeOpacity={item.tier === "paid" ? 1 : 0.95}
       >
         <PostCard
           post={item}
