@@ -76,10 +76,6 @@ const FeedScreen = observer(() => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Лента</Text>
-      </View>
-
       <FlatList
         data={feedStore.posts}
         renderItem={renderItem}
@@ -106,18 +102,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: tokens.colors.background,
-  },
-  header: {
-    paddingHorizontal: tokens.spacing.lg,
-    paddingVertical: tokens.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: tokens.colors.border,
-    backgroundColor: tokens.colors.background,
-  },
-  headerTitle: {
-    fontSize: tokens.typography.fontSize.xxl,
-    fontWeight: "bold",
-    color: tokens.colors.textPrimary,
   },
   listContent: {
     paddingTop: tokens.spacing.md,
