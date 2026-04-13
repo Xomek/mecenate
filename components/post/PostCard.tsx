@@ -6,8 +6,8 @@ import { PostHeader } from "./PostHeader";
 import { PostCover } from "./PostCover";
 import { PostContent } from "./PostContent";
 import { PostActions } from "./PostActions";
-import type { Post } from "../../types";
 import { PaidCoverOverlay } from "./PaidCoverOverlay";
+import type { Post } from "../../types";
 
 interface PostCardProps {
   post: Post;
@@ -30,12 +30,14 @@ export const PostCard = observer(({ post, onLike }: PostCardProps) => {
 
       <PostContent preview={post.preview} isPaid={isPaid} body={post.body} />
 
-      <PostActions
-        likesCount={post.likesCount}
-        commentsCount={post.commentsCount}
-        isLiked={post.isLiked}
-        onLike={onLike}
-      />
+      {!isPaid && (
+        <PostActions
+          likesCount={post.likesCount}
+          commentsCount={post.commentsCount}
+          isLiked={post.isLiked}
+          onLike={onLike}
+        />
+      )}
     </View>
   );
 });
