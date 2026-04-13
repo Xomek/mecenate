@@ -12,9 +12,10 @@ import type { Post } from "../../types";
 interface PostCardProps {
   post: Post;
   onLike: () => void;
+  body?: string;
 }
 
-export const PostCard = observer(({ post, onLike }: PostCardProps) => {
+export const PostCard = observer(({ post, onLike, body }: PostCardProps) => {
   const isPaid = post.tier === "paid";
 
   return (
@@ -25,7 +26,7 @@ export const PostCard = observer(({ post, onLike }: PostCardProps) => {
 
       <PostCover coverUrl={post.coverUrl} title={post.title} />
 
-      <PostContent preview={post.preview} isPaid={isPaid} />
+      <PostContent preview={post.preview} isPaid={isPaid} body={body} />
 
       <PostActions
         likesCount={post.likesCount}

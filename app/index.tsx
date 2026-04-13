@@ -42,7 +42,11 @@ const FeedScreen = observer(() => {
 
   const renderItem = useCallback(
     ({ item }: { item: any }) => (
-      <PostCard post={item} onLike={() => handleLike(item.id)} />
+      <PostCard
+        post={item}
+        onLike={() => handleLike(item.id)}
+        body={item.body}
+      />
     ),
     [handleLike],
   );

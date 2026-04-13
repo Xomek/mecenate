@@ -28,6 +28,6 @@ const styles = StyleSheet.create({
   },
   cover: {
     width: "100%",
-    height: 180,
+    height: 393,
   },
 });
