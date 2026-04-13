@@ -19,6 +19,7 @@ import {
   CommentList,
   CommentInput,
 } from "../../components/post-detail";
+import { ErrorView } from "../../components/ErrorView";
 import {
   usePost,
   useComments,
@@ -36,15 +37,20 @@ const PostDetailScreen = observer(() => {
   const {
     data: postData,
     isLoading: postLoading,
+    error: postError,
     refetch: refetchPost,
   } = usePost(id);
+
   const {
     data: commentsData,
     isLoading: commentsLoading,
+    error: commentsError,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch: refetchComments,
   } = useComments(id);
+
   const { mutate: toggleLike } = useToggleLike();
   const { mutate: addComment } = useAddComment(id);
 
@@ -73,11 +79,12 @@ const PostDetailScreen = observer(() => {
       }
       if (event.type === "comment_added" && event.comment?.postId === id) {
         refetchPost();
+        refetchComments();
       }
     });
 
     return unsubscribe;
-  }, [id, refetchPost]);
+  }, [id, refetchPost, refetchComments]);
 
   const handleLike = () => {
     if (!post) return;
@@ -92,6 +99,11 @@ const PostDetailScreen = observer(() => {
     });
   };
 
+  const handleRetry = () => {
+    refetchPost();
+    refetchComments();
+  };
+
   const handleGoBack = () => {
     if (navigation.canGoBack()) {
       router.back();
@@ -100,12 +112,33 @@ const PostDetailScreen = observer(() => {
     }
   };
 
-  if (postLoading || !post) {
+  if (postLoading) {
     return (
       <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleGoBack}>
+            <ArrowLeft size={24} color={tokens.colors.textPrimary} />
+          </TouchableOpacity>
+        </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={tokens.colors.primary} />
         </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (postError || !post) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleGoBack}>
+            <ArrowLeft size={24} color={tokens.colors.textPrimary} />
+          </TouchableOpacity>
+        </View>
+        <ErrorView
+          message="Не удалось загрузить публикацию"
+          onRetry={handleRetry}
+        />
       </SafeAreaView>
     );
   }
@@ -137,13 +170,24 @@ const PostDetailScreen = observer(() => {
             Комментарии ({comments.length})
           </Text>
 
-          <CommentList
-            comments={comments}
-            loading={commentsLoading}
-            loadingMore={isFetchingNextPage}
-            hasMore={hasNextPage}
-            onLoadMore={fetchNextPage}
-          />
+          {commentsError ? (
+            <View style={styles.commentsError}>
+              <Text style={styles.commentsErrorText}>
+                Не удалось загрузить комментарии
+              </Text>
+              <TouchableOpacity onPress={() => refetchComments()}>
+                <Text style={styles.retryText}>Повторить</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <CommentList
+              comments={comments}
+              loading={commentsLoading}
+              loadingMore={isFetchingNextPage}
+              hasMore={hasNextPage}
+              onLoadMore={fetchNextPage}
+            />
+          )}
         </View>
 
         <CommentInput onSubmit={handleSendComment} />
@@ -176,6 +220,20 @@ const styles = StyleSheet.create({
     color: tokens.colors.textPrimary,
     marginTop: tokens.spacing.lg,
     marginBottom: tokens.spacing.md,
+  },
+  commentsError: {
+    alignItems: "center",
+    paddingVertical: tokens.spacing.xl,
+  },
+  commentsErrorText: {
+    fontSize: tokens.typography.fontSize.md,
+    color: tokens.colors.textSecondary,
+    marginBottom: tokens.spacing.md,
+  },
+  retryText: {
+    fontSize: tokens.typography.fontSize.md,
+    fontWeight: "500",
+    color: tokens.colors.primary,
   },
 });
 
