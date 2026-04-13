@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { BlurView } from "expo-blur";
+import { DollarSign } from "lucide-react-native";
 import { tokens } from "../../theme/tokens";
 
 interface PaidOverlayProps {
@@ -17,6 +18,9 @@ export const PaidOverlay = ({ onDonate }: PaidOverlayProps) => {
     <View style={styles.paidOverlay}>
       <BlurView intensity={20} tint="dark" style={styles.blur} />
       <View style={styles.paidContent}>
+        <View style={styles.iconContainer}>
+          <DollarSign style={styles.dollarIcon} size={20} />
+        </View>
         <Text style={styles.paidTitle}>Контент скрыт пользователем.</Text>
         <Text style={styles.paidSubtitle}>Доступ откроется после доната</Text>
         <TouchableOpacity
@@ -58,6 +62,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: tokens.spacing.xl,
     backgroundColor: "rgba(0, 0, 0, 0.3)",
+  },
+  iconContainer: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    backgroundColor: tokens.colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: tokens.spacing.lg,
+  },
+  dollarIcon: {
+    backgroundColor: "#FFFFFF",
+    color: tokens.colors.primary,
+    borderRadius: "50%",
+    padding: 2,
   },
   paidTitle: {
     fontSize: tokens.typography.fontSize.lg,
