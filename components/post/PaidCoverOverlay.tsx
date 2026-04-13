@@ -4,31 +4,32 @@ import { BlurView } from "expo-blur";
 import { DollarSign } from "lucide-react-native";
 import { tokens } from "../../theme/tokens";
 
-interface PaidOverlayProps {
+interface PaidCoverOverlayProps {
   onDonate?: () => void;
 }
 
-export const PaidOverlay = ({ onDonate }: PaidOverlayProps) => {
+export const PaidCoverOverlay = ({ onDonate }: PaidCoverOverlayProps) => {
   const handleDonate = () => {
     console.log("Donate pressed");
     onDonate?.();
   };
 
   return (
-    <View style={styles.paidOverlay}>
-      <BlurView intensity={70} tint="dark" style={styles.blur} />
-      <View style={styles.paidContent}>
+    <View style={styles.overlay}>
+      <BlurView intensity={40} tint="dark" style={styles.blur} />
+      <View style={styles.darkOverlay} />
+      <View style={styles.content}>
         <View style={styles.iconContainer}>
-          <DollarSign style={styles.dollarIcon} size={20} />
+          <DollarSign style={styles.iconDollars} size={20} />
         </View>
-        <Text style={styles.paidTitle}>Контент скрыт пользователем.</Text>
-        <Text style={styles.paidSubtitle}>Доступ откроется после доната</Text>
+        <Text style={styles.title}>Контент скрыт пользователем.</Text>
+        <Text style={styles.subtitle}>Доступ откроется после доната</Text>
         <TouchableOpacity
-          style={styles.donateButton}
+          style={styles.button}
           onPress={handleDonate}
           activeOpacity={0.8}
         >
-          <Text style={styles.donateButtonText}>Отправить донат</Text>
+          <Text style={styles.buttonText}>Отправить донат</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -36,13 +37,13 @@ export const PaidOverlay = ({ onDonate }: PaidOverlayProps) => {
 };
 
 const styles = StyleSheet.create({
-  paidOverlay: {
+  overlay: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: tokens.borderRadius.lg,
+    borderRadius: tokens.borderRadius.md,
     overflow: "hidden",
   },
   blur: {
@@ -52,7 +53,15 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  paidContent: {
+  darkOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  content: {
     position: "absolute",
     top: 0,
     left: 0,
@@ -61,7 +70,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: tokens.spacing.xl,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
   },
   iconContainer: {
     width: 42,
@@ -70,38 +78,37 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: tokens.spacing.lg,
+    marginBottom: tokens.spacing.md,
   },
-  dollarIcon: {
+  iconDollars: {
     backgroundColor: "#FFFFFF",
     color: tokens.colors.primary,
     borderRadius: "50%",
     padding: 2,
   },
-  paidTitle: {
-    fontSize: tokens.typography.fontSize.lg,
+  title: {
+    fontSize: tokens.typography.fontSize.md,
     fontWeight: "600",
     color: "#FFFFFF",
-    marginBottom: tokens.spacing.xs,
+    marginBottom: 4,
     textAlign: "center",
   },
-  paidSubtitle: {
-    fontSize: tokens.typography.fontSize.md,
-    color: "rgba(255, 255, 255, 0.8)",
-    marginBottom: tokens.spacing.xl,
+  subtitle: {
+    fontSize: tokens.typography.fontSize.sm,
+    color: "rgba(255, 255, 255, 0.9)",
+    marginBottom: tokens.spacing.lg,
     textAlign: "center",
   },
-  donateButton: {
+  button: {
     backgroundColor: tokens.colors.primary,
-    paddingHorizontal: tokens.spacing.xxxl,
-    paddingVertical: tokens.spacing.md,
+    paddingHorizontal: tokens.spacing.xxl,
+    paddingVertical: tokens.spacing.sm,
     borderRadius: tokens.borderRadius.full,
-    minWidth: 200,
-    alignItems: "center",
   },
-  donateButtonText: {
+  buttonText: {
     color: "#FFFFFF",
     fontSize: tokens.typography.fontSize.md,
     fontWeight: "600",
+    padding: 2,
   },
 });

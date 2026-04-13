@@ -13,7 +13,7 @@ export const PostCover = ({ coverUrl, title }: PostCoverProps) => {
       <Image
         source={{ uri: coverUrl }}
         style={styles.cover}
-        accessibilityLabel={title}
+        resizeMode="cover"
       />
     </View>
   );
@@ -21,13 +21,14 @@ export const PostCover = ({ coverUrl, title }: PostCoverProps) => {
 
 const styles = StyleSheet.create({
   coverContainer: {
-    marginBottom: tokens.spacing.md,
+    width: "100%",
+    height: 393,
     borderRadius: tokens.borderRadius.md,
     overflow: "hidden",
     backgroundColor: tokens.colors.surface,
   },
   cover: {
     width: "100%",
-    height: 393,
+    height: "100%",
   },
 });

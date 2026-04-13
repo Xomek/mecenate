@@ -24,6 +24,8 @@ export const tokens = {
     icon: "#8E8E93",
     like: "#FF3B30",
     buttonBackground: "#F2F2F7",
+
+    skeleton: "#EEEFF1CC",
   },
 
   spacing: {

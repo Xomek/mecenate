@@ -12,25 +12,27 @@ export const PostContent = ({ preview, isPaid, body }: PostContentProps) => {
   const [expanded, setExpanded] = useState(false);
 
   if (isPaid) {
-    return null;
+    return (
+      <View style={styles.content}>
+        <View style={[styles.skeletonLine, styles.skeletonShort]} />
+        <View style={styles.skeletonLine} />
+      </View>
+    );
   }
 
-  const displayText = expanded && body ? body : preview;
   const hasMore = body && body.length > preview.length;
+  const displayText = expanded && body ? body : preview;
 
   return (
     <View style={styles.content}>
-      <Text style={styles.preview}>
+      <Text style={styles.preview} numberOfLines={expanded ? undefined : 3}>
         {displayText}
-        {hasMore && !expanded && (
-          <Text>
-            {" "}
-            <Text style={styles.showMore} onPress={() => setExpanded(true)}>
-              Показать ещё
-            </Text>
-          </Text>
-        )}
       </Text>
+      {hasMore && !expanded && (
+        <TouchableOpacity onPress={() => setExpanded(true)}>
+          <Text style={styles.showMore}>Показать ещё</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -49,5 +51,20 @@ const styles = StyleSheet.create({
     fontSize: tokens.typography.fontSize.md,
     fontWeight: "500",
     color: tokens.colors.primary,
+    marginTop: tokens.spacing.xs,
+  },
+  skeletonLine: {
+    height: 40,
+    backgroundColor: tokens.colors.skeleton,
+    borderRadius: 22,
+    marginBottom: 8,
+    width: "100%",
+  },
+  skeletonShort: {
+    height: 26,
+    width: "50%",
+  },
+  skeletonMedium: {
+    width: "85%",
   },
 });

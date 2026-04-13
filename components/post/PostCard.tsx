@@ -1,21 +1,20 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { observer } from "mobx-react-lite";
 import { tokens } from "../../theme/tokens";
 import { PostHeader } from "./PostHeader";
 import { PostCover } from "./PostCover";
 import { PostContent } from "./PostContent";
 import { PostActions } from "./PostActions";
-import { PaidOverlay } from "./PaidOverlay";
 import type { Post } from "../../types";
+import { PaidCoverOverlay } from "./PaidCoverOverlay";
 
 interface PostCardProps {
   post: Post;
   onLike: () => void;
-  body?: string;
 }
 
-export const PostCard = observer(({ post, onLike, body }: PostCardProps) => {
+export const PostCard = observer(({ post, onLike }: PostCardProps) => {
   const isPaid = post.tier === "paid";
 
   return (
@@ -24,9 +23,12 @@ export const PostCard = observer(({ post, onLike, body }: PostCardProps) => {
 
       <Text style={styles.title}>{post.title}</Text>
 
-      <PostCover coverUrl={post.coverUrl} title={post.title} />
+      <View style={styles.coverContainer}>
+        <PostCover coverUrl={post.coverUrl} title={post.title} />
+        {isPaid && <PaidCoverOverlay />}
+      </View>
 
-      <PostContent preview={post.preview} isPaid={isPaid} body={body} />
+      <PostContent preview={post.preview} isPaid={isPaid} body={post.body} />
 
       <PostActions
         likesCount={post.likesCount}
@@ -34,8 +36,6 @@ export const PostCard = observer(({ post, onLike, body }: PostCardProps) => {
         isLiked={post.isLiked}
         onLike={onLike}
       />
-
-      {isPaid && <PaidOverlay />}
     </View>
   );
 });
@@ -48,13 +48,16 @@ const styles = StyleSheet.create({
     marginBottom: tokens.spacing.lg,
     padding: tokens.spacing.lg,
     boxShadow: tokens.shadows.sm.boxShadow,
-    position: "relative",
-    overflow: "hidden",
+    elevation: tokens.shadows.sm.elevation,
   },
   title: {
     fontSize: tokens.typography.fontSize.lg,
     fontWeight: "600",
     color: tokens.colors.textPrimary,
+    marginBottom: tokens.spacing.md,
+  },
+  coverContainer: {
+    position: "relative",
     marginBottom: tokens.spacing.md,
   },
 });
