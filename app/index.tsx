@@ -10,13 +10,13 @@ import {
 } from "react-native";
 import { observer } from "mobx-react-lite";
 import { feedStore } from "../stores/FeedStore";
-import { PostCard } from "../components/PostCard";
 import { ErrorView } from "../components/ErrorView";
 import {
   LoadingIndicator,
   LoadingMoreIndicator,
 } from "../components/LoadingIndicator";
 import { tokens } from "../theme/tokens";
+import { PostCard } from "../components/post";
 
 const FeedScreen = observer(() => {
   useEffect(() => {
