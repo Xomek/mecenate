@@ -1,6 +1,6 @@
 import React from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
-import { tokens } from "../theme/tokens";
+import { tokens } from "../../theme/tokens";
 
 export const LoadingIndicator = () => {
   return (

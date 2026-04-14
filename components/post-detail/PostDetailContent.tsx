@@ -12,7 +12,7 @@ interface PostDetailContentProps {
 export const PostDetailContent = ({ post }: PostDetailContentProps) => {
   return (
     <>
-      <PostHeader author={post.author} createdAt={post.createdAt} />
+      <PostHeader author={post.author} />
       <PostCover coverUrl={post.coverUrl} />
       <Text style={styles.title}>{post.title}</Text>
       <Text style={styles.body}>{post.body}</Text>

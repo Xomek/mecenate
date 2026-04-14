@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Heart } from "lucide-react-native";
+import { Avatar } from "../shared/Avatar";
 import { tokens } from "../../theme/tokens";
 import type { Comment } from "../../types";
 
@@ -19,7 +20,11 @@ export const CommentItem = ({ comment }: CommentItemProps) => {
 
   return (
     <View style={styles.container}>
-      <Image source={{ uri: comment.author.avatarUrl }} style={styles.avatar} />
+      <Avatar
+        source={{ uri: comment.author.avatarUrl }}
+        size={40}
+        fallback={comment.author.displayName}
+      />
       <View style={styles.content}>
         <Text style={styles.authorName}>{comment.author.displayName}</Text>
         <Text style={styles.commentText}>{comment.text}</Text>
@@ -47,17 +52,12 @@ export const CommentItem = ({ comment }: CommentItemProps) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     marginBottom: tokens.spacing.md,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: tokens.spacing.sm,
   },
   content: {
     flex: 1,
+    marginLeft: tokens.spacing.sm,
     marginRight: tokens.spacing.sm,
   },
   authorName: {

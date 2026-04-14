@@ -1,17 +1,21 @@
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+import { Avatar } from "../shared/Avatar";
 import { tokens } from "../../theme/tokens";
 import type { Author } from "../../types";
 
 interface PostHeaderProps {
   author: Author;
-  createdAt: string;
 }
 
-export const PostHeader = ({ author, createdAt }: PostHeaderProps) => {
+export const PostHeader = ({ author }: PostHeaderProps) => {
   return (
     <View style={styles.header}>
-      <Image source={{ uri: author.avatarUrl }} style={styles.avatar} />
+      <Avatar
+        source={{ uri: author.avatarUrl }}
+        size={40}
+        fallback={author.displayName}
+      />
       <View style={styles.authorInfo}>
         <View style={styles.nameRow}>
           <Text style={styles.displayName}>{author.displayName}</Text>
@@ -27,14 +31,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: tokens.spacing.md,
   },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: tokens.spacing.md,
-  },
   authorInfo: {
     flex: 1,
+    marginLeft: tokens.spacing.md,
   },
   nameRow: {
     flexDirection: "row",

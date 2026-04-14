@@ -20,7 +20,6 @@ import {
   CommentItem,
   CommentInput,
 } from "../../components/post-detail";
-import { ErrorView } from "../../components/ErrorView";
 import {
   usePost,
   useComments,
@@ -30,6 +29,7 @@ import {
 import { wsService } from "../../services/websocket";
 import { getAuthToken } from "../../services/auth";
 import { useQueryClient } from "@tanstack/react-query";
+import { ErrorView } from "../../components/error/ErrorView";
 
 const PostDetailScreen = observer(() => {
   const { id } = useLocalSearchParams<{ id: string }>();

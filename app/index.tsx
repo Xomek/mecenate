@@ -15,8 +15,8 @@ import { feedStore, TabType } from "../stores/FeedStore";
 import { usePosts, useToggleLike } from "../services/hooks";
 import { PostCard } from "../components/post";
 import { FeedTabs } from "../components/FeedTabs";
-import { ErrorView } from "../components/ErrorView";
 import { tokens } from "../theme/tokens";
+import { ErrorView } from "../components/error/ErrorView";
 
 const FeedScreen = observer(() => {
   const router = useRouter();

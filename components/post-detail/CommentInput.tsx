@@ -1,13 +1,8 @@
 import React, { useState } from "react";
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import { View, TouchableOpacity, StyleSheet, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
 import { Send } from "lucide-react-native";
+import { TextField } from "../shared/TextField";
 import { tokens } from "../../theme/tokens";
 
 interface CommentInputProps {
@@ -31,16 +26,16 @@ export const CommentInput = ({ onSubmit }: CommentInputProps) => {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Написать комментарий..."
-        placeholderTextColor={tokens.colors.textTertiary}
-        value={text}
-        onChangeText={setText}
-        multiline
-        maxLength={500}
-        blurOnSubmit={false}
-      />
+      <View style={styles.inputWrapper}>
+        <TextField
+          style={styles.input}
+          placeholder="Написать комментарий..."
+          value={text}
+          onChangeText={setText}
+          multiline
+          maxLength={500}
+        />
+      </View>
       <TouchableOpacity
         style={[
           styles.button,
@@ -68,17 +63,12 @@ const styles = StyleSheet.create({
       paddingBottom: Math.max(tokens.spacing.md, 34),
     }),
   },
-  input: {
+  inputWrapper: {
     flex: 1,
-    minHeight: 40,
-    maxHeight: 100,
-    backgroundColor: tokens.colors.surface,
-    borderRadius: tokens.borderRadius.lg,
-    paddingHorizontal: tokens.spacing.md,
-    paddingVertical: tokens.spacing.sm,
-    fontSize: tokens.typography.fontSize.md,
-    color: tokens.colors.textPrimary,
     marginRight: tokens.spacing.md,
+  },
+  input: {
+    marginBottom: 0,
   },
   button: {
     width: 40,
@@ -87,6 +77,7 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.colors.primary,
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 0,
   },
   buttonDisabled: {
     opacity: 0.5,

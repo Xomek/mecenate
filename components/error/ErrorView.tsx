@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
-import { tokens } from "../theme/tokens";
 
-import errorIllustration from "../assets/images/illustration_sticker.png";
+import errorIllustration from "../../assets/images/illustration_sticker.png";
+import { tokens } from "../../theme/tokens";
 
 interface ErrorViewProps {
   message?: string;
